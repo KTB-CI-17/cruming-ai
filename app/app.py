@@ -1,9 +1,5 @@
 from fastapi import FastAPI
-from health import router as health_router
+from app.health import router as health_router  # 절대 경로로 수정
 
 app = FastAPI()
-
-# Health check endpoint 추가
 app.include_router(health_router)
-
-print('test')
