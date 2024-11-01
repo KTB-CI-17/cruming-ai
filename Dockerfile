@@ -5,14 +5,14 @@ FROM python:3.10.11-slim
 WORKDIR /app
 
 # Python 패키지 설치
-COPY app/requirements.txt /app/requirements.txt
+COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 애플리케이션 코드 전체 복사
 COPY app /app/app
 
 # 모델 파일 복사
-COPY model /app/model
+COPY app/model /app/model
 
 # 웹 서버 포트 노출
 EXPOSE 8000

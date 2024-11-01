@@ -1,8 +1,13 @@
 from fastapi import APIRouter
 import os
+from pathlib import Path
 
 router = APIRouter()
 
 @router.get("/health")
 async def health_check():
-    return {"status": "ok", "model_loaded": os.path.exists("/app/model/model.bin")}
+    model_path = Path(__file__).parent / "models" / "weights" / "Ndatayolov5.pt"
+    return {
+        "status": "ok",
+        "model_loaded": os.path.exists(model_path)
+    }
