@@ -20,3 +20,10 @@
 - chore: 빌드 업무 수정, 패키지 매니저 수정
 - rename: 파일 혹은 폴더 명 변경만 진행된 경우
 - remove: 파일 혹은 폴더 삭제 작업만 진행된 경우
+
+
+
+### 테스트 코드
+***
+curl -X POST -F "file=@images/hold-test.jpeg" http://localhost:8000/detect
+curl http://localhost:8000/health
