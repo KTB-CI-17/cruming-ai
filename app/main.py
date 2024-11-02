@@ -1,5 +1,5 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from app.model.detector import HoldDetector
+from app.detector import HoldDetector
 from app.health import router as health_router
 
 app = FastAPI(
@@ -22,9 +22,11 @@ async def detect_holds(file: UploadFile = File(...)):
     try:
         result = await detector.detect(file)
         if "error" in result:
+            print("error")
             raise HTTPException(status_code=500, detail=result["error"])
         return result
     except Exception as e:
+        print("exception")
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
