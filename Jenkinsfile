@@ -21,21 +21,16 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-           steps {
-               script {
-                   sh """
-                       sudo DOCKER_BUILDKIT=1 docker build \
-                           --build-arg BUILDKIT_INLINE_CACHE=1 \
-                           --cache-from ${DOCKER_IMAGE_NAME}:latest \
-                           --compress \
-                           --network=host \
-                           -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} .
-                   """
-                   sh """
-                       sudo docker tag ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_IMAGE_NAME}:latest
-                   """
-               }
-           }
+            steps {
+                script {
+                    sh """
+                        docker build -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} .
+                    """
+                    sh """
+                        docker tag ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_IMAGE_NAME}:latest
+                    """
+                }
+            }
         }
 
         stage('Push to Docker Hub') {
