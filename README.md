@@ -23,7 +23,6 @@
 - remove: 파일 혹은 폴더 삭제 작업만 진행된 경우
 
 
-
 ### 테스트 코드
 ***
 curl -X POST -F "file=@images/hold-test.jpeg" http://localhost:8000/detect  
