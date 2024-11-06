@@ -12,14 +12,18 @@ pipeline {
     }
 
     stages {
-        stage('PR Branch Filter') {
-            when {
-                expression {
-                    return env.CHANGE_TARGET == 'product'
-                }
-            }
+        stage('Branch Check') {
             steps {
-                echo "PR is targeting 'product' branch. Running pipeline..."
+                script {
+                    def isPR = env.CHANGE_ID != null
+                    def targetBranch = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+                    def mergeCommit = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+
+                    if (targetBranch != 'product' || !mergeCommit.contains('Merge pull request')) {
+                        currentBuild.result = 'ABORTED'
+                        error('Not a merged PR to product branch. Skipping pipeline.')
+                    }
+                }
             }
         }
 
