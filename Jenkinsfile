@@ -12,21 +12,6 @@ pipeline {
     }
 
     stages {
-        stage('Branch Check') {
-            steps {
-                script {
-                    def isPR = env.CHANGE_ID != null
-                    def targetBranch = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
-                    def mergeCommit = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
-
-                    if (targetBranch != 'product' || !mergeCommit.contains('Merge pull request')) {
-                        currentBuild.result = 'ABORTED'
-                        error('Not a merged PR to product branch. Skipping pipeline.')
-                    }
-                }
-            }
-        }
-
         stage('Git Checkout') {
             steps {
                 git branch: 'product',
