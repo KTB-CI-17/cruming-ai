@@ -33,16 +33,17 @@ pipeline {
             }
         }
 
-        stage('Push to Docker Hub') {
-            steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
-                        dockerImage.push("${env.BUILD_NUMBER}")
-                        dockerImage.push("${IMAGE_TAG}")
-                    }
-                }
-            }
-        }
+       stage('Push to Docker Hub') {
+           steps {
+               script {
+                   withDockerRegistry([ credentialsId: "${DOCKER_CREDENTIALS_ID}", url: "" ]) {
+                       sh """
+                           docker push ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
+                       """
+                   }
+               }
+           }
+       }
 
         stage('Deploy to AI Server') {
             steps {
