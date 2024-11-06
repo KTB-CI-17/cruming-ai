@@ -27,3 +27,4 @@
 ***
 curl -X POST -F "file=@images/hold-test.jpeg" http://localhost:8000/detect  
 curl http://localhost:8000/health
+
