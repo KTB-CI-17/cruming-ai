@@ -24,7 +24,7 @@ pipeline {
            steps {
                script {
                    sh """
-                       DOCKER_BUILDKIT=1 docker build \
+                       sudo DOCKER_BUILDKIT=1 docker build \
                            --build-arg BUILDKIT_INLINE_CACHE=1 \
                            --cache-from ${DOCKER_IMAGE_NAME}:latest \
                            --compress \
@@ -32,7 +32,7 @@ pipeline {
                            -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} .
                    """
                    sh """
-                       docker tag ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_IMAGE_NAME}:latest
+                       sudo docker tag ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_IMAGE_NAME}:latest
                    """
                }
            }
