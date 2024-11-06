@@ -32,11 +32,21 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            steps {
-                script {
-                    dockerImage = docker.build("${DOCKER_IMAGE_NAME}:${IMAGE_TAG}", "--no-cache .")
-                }
-            }
+           steps {
+               script {
+                   sh """
+                       DOCKER_BUILDKIT=1 docker build \
+                           --build-arg BUILDKIT_INLINE_CACHE=1 \
+                           --cache-from ${DOCKER_IMAGE_NAME}:latest \
+                           --compress \
+                           --network=host \
+                           -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} .
+                   """
+                   sh """
+                       docker tag ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_IMAGE_NAME}:latest
+                   """
+               }
+           }
         }
 
         stage('Push to Docker Hub') {
@@ -54,8 +64,7 @@ pipeline {
             steps {
                 script {
                     withCredentials([
-                        string(credentialsId: 'ai_ip', variable: 'PRIVATE_IP'),
-                        string(credentialsId: 'bastion_ip', variable: 'PUBLIC_IP')
+                        string(credentialsId: 'ai_ip', variable: 'PRIVATE_IP')
                     ]) {
                         sshagent(['ec2_ssh']) {
                             sh """
@@ -75,13 +84,16 @@ pipeline {
             steps {
                 script {
                     withCredentials([
-                        string(credentialsId: 'ai_ip', variable: 'PRIVATE_IP'),
-                        string(credentialsId: 'bastion_ip', variable: 'PUBLIC_IP')
+                        string(credentialsId: 'ai_ip', variable: 'PRIVATE_IP')
                     ]) {
                         sshagent(['ec2_ssh']) {
                             sh """
                             ssh -v -o StrictHostKeyChecking=no ubuntu@${PRIVATE_IP} \\
-                            'sleep 5 && curl -f http://localhost:${REMOTE_PORT}/health || (echo "Health check failed" && exit 1)'
+                            'for i in {1..12}; do \\
+                                curl -sf http://localhost:${REMOTE_PORT}/health && echo "Health check succeeded" && exit 0 || \\
+                                (echo "Attempt \$i: Health check failed, retrying in 5 seconds..." && sleep 5); \\
+                            done; \\
+                            echo "Health check failed after all attempts" && exit 1'
                             """
                         }
                     }
