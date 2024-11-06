@@ -1,7 +1,7 @@
 # cruming-ai
 
 ### Git-hub 전략을 따름
-
+***
 - product : 운영에 배포할 브랜치
 - develop : 다음 출시 버전을 개발하는 브랜치
 - feature : 기능을 개발하는 브랜치
