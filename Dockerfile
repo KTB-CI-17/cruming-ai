@@ -14,7 +14,7 @@ COPY app/ ./app/
 COPY model/ ./model/
 
 # 실행 환경용 이미지
-FROM choiseu98/python3.10.11-slim-cruming:latest as builder
+FROM choiseu98/python3.10.11-slim-cruming:latest
 
 WORKDIR /app
 
