@@ -24,26 +24,23 @@ pipeline {
             steps {
                 script {
                     sh """
-                        docker build -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} .
-                    """
-                    sh """
+                        export DOCKER_BUILDKIT=1
+                        docker build --cache-from ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} .
                         docker tag ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_IMAGE_NAME}:latest
                     """
                 }
             }
         }
 
-       stage('Push to Docker Hub') {
-           steps {
-               script {
-                   withDockerRegistry([ credentialsId: "${DOCKER_CREDENTIALS_ID}", url: "" ]) {
-                       sh """
-                           docker push ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
-                       """
-                   }
-               }
-           }
-       }
+        stage('Push to Docker Hub') {
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
+                        docker.image("${DOCKER_IMAGE_NAME}:${IMAGE_TAG}").push()
+                    }
+                }
+            }
+        }
 
         stage('Deploy to AI Server') {
             steps {
