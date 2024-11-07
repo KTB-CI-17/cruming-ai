@@ -88,7 +88,11 @@ pipeline {
         always {
             cleanWs()
             script {
-                sh 'docker system prune -a -f --volumes'
+                sh """
+                    docker ps -a -q --filter ancestor=moby/buildkit:buildx-stable-1 | xargs -r docker stop
+                    docker ps -a -q --filter ancestor=moby/buildkit:buildx-stable-1 | xargs -r docker rm
+                    docker system prune -a -f --volumes
+                """
             }
         }
     }
