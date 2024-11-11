@@ -9,7 +9,6 @@ pipeline {
         CONTAINER_NAME          = 'ktb-cruming-ai'
         REMOTE_PORT             = '8000'
         IMAGE_TAG               = 'latest'
-        FLUENTD_ADDRESS         = '3.35.176.227:24224'
     }
 
     stages {
@@ -47,7 +46,8 @@ pipeline {
             steps {
                 script {
                     withCredentials([
-                        string(credentialsId: 'ai_ip', variable: 'PRIVATE_IP')
+                        string(credentialsId: 'ai_ip', variable: 'PRIVATE_IP'),
+                        string(credentialsId: 'fluentd_address', variable: 'FLUENTD_ADDRESS')
                     ]) {
                         sshagent(['ec2_ssh']) {
                             sh """
