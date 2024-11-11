@@ -9,6 +9,7 @@ pipeline {
         CONTAINER_NAME          = 'ktb-cruming-ai'
         REMOTE_PORT             = '8000'
         IMAGE_TAG               = 'latest'
+        FLUENTD_ADDRESS         = '3.35.176.227:24224'
     }
 
     stages {
@@ -54,7 +55,13 @@ pipeline {
                             "sudo docker pull ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} && \\
                             sudo docker stop ${CONTAINER_NAME} || true && \\
                             sudo docker rm ${CONTAINER_NAME} || true && \\
-                            sudo docker run -d --name ${CONTAINER_NAME} -p ${REMOTE_PORT}:${REMOTE_PORT} ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}"
+                            sudo docker run -d \\
+                              --name ${CONTAINER_NAME} \\
+                              --log-driver=fluentd \\
+                              --log-opt fluentd-address=${FLUENTD_ADDRESS} \\
+                              --log-opt tag=${CONTAINER_NAME} \\
+                              -p ${REMOTE_PORT}:${REMOTE_PORT} \\
+                              ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}"
                             """
                         }
                     }
