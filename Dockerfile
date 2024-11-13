@@ -1,4 +1,5 @@
 # syntax=docker/dockerfile:1.3
+
 # Step 1: 기본 이미지 가져오기
 FROM choiseu98/python3.10.11-slim-cruming:latest
 
@@ -12,8 +13,8 @@ ENV PYTHONPATH=/app
 # Step 4: 의존성 파일 복사 및 설치
 COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --upgrade pip setuptools wheel && \
+    pip install -r requirements.txt
 
 # Step 5: 애플리케이션 코드와 모델 복사
 COPY app/ ./app/
