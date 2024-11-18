@@ -1,6 +1,6 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from app.detector import HoldDetector
-from app.health import router as health_router
+from detector import HoldDetector
+from health import router as health_router
 
 app = FastAPI(
     title="Hold Detection API",
