@@ -22,7 +22,7 @@ from utils.augmentations import letterbox
 class HoldDetector:
     def __init__(self):
         # 모델 경로 설정
-        model_path = FILE.parents[1] / "model" / "weights" / "Ndatayolov5n.pt"
+        model_path = FILE.parents[1] / "model" / "weights" / "Ndatayolov5.pt"
         print(f"Loading model from: {model_path}")
         # 디바이스 설정 (GPU 사용 가능 시 GPU 사용)
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
