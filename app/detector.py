@@ -23,19 +23,22 @@ class HoldDetector:
 
             # 결과 처리
             holds = []
-            for r in results[0].boxes.data:
-                x1, y1, x2, y2, conf, cls = r
-                hold_info = {
-                    "class": results[0].names[int(cls)],
-                    "confidence": float(conf),
-                    "coordinates": {
-                        "x1": float(x1),
-                        "y1": float(y1),
-                        "x2": float(x2),
-                        "y2": float(y2)
+            # results[0].boxes.data와 results[0].masks.xy는 인덱스로 일치
+            for i, box_data in enumerate(results[0].boxes.data):
+                x1, y1, x2, y2, conf, cls = box_data
+                cls = int(cls)
+
+                # 클래스가 0인 경우만 polygon 좌표를 전달
+                if cls == 0:
+                    # polygon 좌표 정보는 results[0].masks.xy[i]에 있습니다.
+                    polygon_coords = results[0].masks.xy[i].tolist()
+
+                    hold_info = {
+                        "class": results[0].names[cls],
+                        "confidence": float(conf),
+                        "polygon": polygon_coords
                     }
-                }
-                holds.append(hold_info)
+                    holds.append(hold_info)
 
             return {"holds": holds}
 
