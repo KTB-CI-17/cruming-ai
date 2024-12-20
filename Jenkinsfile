@@ -1,5 +1,5 @@
 pipeline {
-    agent any /
+    agent any
 
     environment {
         REPO                    = 'KTB-CI-17/cruming-ai'
