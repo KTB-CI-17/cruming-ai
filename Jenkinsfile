@@ -1,94 +1,75 @@
 pipeline {
-    agent any
+    agent any /
 
     environment {
-        REPO                    = 'KTB-CI-17/cruming-ai'
-        DOCKER_IMAGE_NAME       = 'choiseu98/ktb-cruming-ai'
-        DOCKER_CREDENTIALS_ID   = 'docker_account'
-        EC2_USER                = 'ubuntu'
-        CONTAINER_NAME          = 'ktb-cruming-ai'
-        REMOTE_PORT             = '8000'
-        IMAGE_TAG               = 'latest'
+        REPO                    = 'KTB-CI-17/cruming-server'
+        GIT_BRANCH              = 'product'
+        GIT_CREDENTIALS_ID      = 'github_account' // 매니페스트 저장소 접근을 위한 크리덴셜 ID
+        DOCKER_HUB_CREDENTIALS_ID = 'docker_hub_credentials' // Docker Hub 크리덴셜 ID
+        DOCKER_HUB_REPO         = 'minyubo/ktb-cruming-server'
+        IMAGE_TAG               = "${env.BUILD_NUMBER}"
     }
 
     stages {
         stage('Git Checkout') {
             steps {
-                git branch: 'product',
-                    credentialsId: 'github_account',
+                git branch: "${GIT_BRANCH}",
+                    credentialsId: "${GIT_CREDENTIALS_ID}",
                     url: "https://github.com/${REPO}.git"
             }
         }
+
+        stage('Docker Test') {
+            steps {
+                script {
+                    sh """
+                        export PATH=\$PATH:~/.docker/cli-plugins
+                        docker buildx version
+                        docker buildx ls
+                    """
+                }
+            }
+        }
+
 
         stage('Build Docker Image') {
             steps {
                 script {
                     sh """
                         export DOCKER_BUILDKIT=1
-                        docker build --cache-from ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} .
-                        docker tag ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_IMAGE_NAME}:latest
+                        docker buildx build --platform linux/amd64 \
+                            -t ${DOCKER_HUB_REPO}:${IMAGE_TAG} \
+                            -t ${DOCKER_HUB_REPO}:latest \
+                            --load .
                     """
                 }
             }
         }
 
+
         stage('Push to Docker Hub') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
-                        docker.image("${DOCKER_IMAGE_NAME}:${IMAGE_TAG}").push()
+                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_HUB_CREDENTIALS_ID}") {
+                        docker.image("${DOCKER_HUB_REPO}:${IMAGE_TAG}").push()
+                        docker.image("${DOCKER_HUB_REPO}:latest").push()
                     }
                 }
             }
         }
 
-        stage('Deploy to AI Server') {
+        stage('Debug Environment Variables') {
             steps {
                 script {
-                    withCredentials([
-                        string(credentialsId: 'ai_ip', variable: 'PRIVATE_IP'),
-                        string(credentialsId: 'fluentd_address', variable: 'FLUENTD_ADDRESS')
-                    ]) {
-                        sshagent(['ec2_ssh']) {
-                            sh """
-                            ssh -v -o StrictHostKeyChecking=no ubuntu@${PRIVATE_IP} \\
-                            "sudo docker pull ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} && \\
-                            sudo docker stop ${CONTAINER_NAME} || true && \\
-                            sudo docker rm ${CONTAINER_NAME} || true && \\
-                            sudo docker run -d \\
-                              --name ${CONTAINER_NAME} \\
-                              --log-driver=fluentd \\
-                              --log-opt fluentd-address=${FLUENTD_ADDRESS} \\
-                              --log-opt tag=${CONTAINER_NAME} \\
-                              -p ${REMOTE_PORT}:${REMOTE_PORT} \\
-                              ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}"
-                            """
-                        }
-                    }
+                    echo "REPO: ${REPO}"
+                    echo "GIT_BRANCH: ${GIT_BRANCH}"
+                    echo "DOCKER_HUB_CREDENTIALS_ID: ${DOCKER_HUB_CREDENTIALS_ID}"
+                    echo "DOCKER_HUB_REPO: ${DOCKER_HUB_REPO}"
+                    echo "IMAGE_TAG: ${IMAGE_TAG}"
                 }
             }
         }
 
-        stage('Health Check') {
-            steps {
-                script {
-                    withCredentials([
-                        string(credentialsId: 'ai_ip', variable: 'PRIVATE_IP')
-                    ]) {
-                        sshagent(['ec2_ssh']) {
-                            sh """
-                            ssh -v -o StrictHostKeyChecking=no ubuntu@${PRIVATE_IP} \\
-                            'for i in {1..12}; do \\
-                                curl -sf http://localhost:${REMOTE_PORT}/health && echo "Health check succeeded" && exit 0 || \\
-                                (echo "Attempt \$i: Health check failed, retrying in 5 seconds..." && sleep 5); \\
-                            done; \\
-                            echo "Health check failed after all attempts" && exit 1'
-                            """
-                        }
-                    }
-                }
-            }
-        }
     }
 
     post {
