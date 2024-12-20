@@ -2,11 +2,11 @@ pipeline {
     agent any /
 
     environment {
-        REPO                    = 'KTB-CI-17/cruming-server'
+        REPO                    = 'KTB-CI-17/cruming-ai'
         GIT_BRANCH              = 'product'
         GIT_CREDENTIALS_ID      = 'github_account' // 매니페스트 저장소 접근을 위한 크리덴셜 ID
         DOCKER_HUB_CREDENTIALS_ID = 'docker_hub_credentials' // Docker Hub 크리덴셜 ID
-        DOCKER_HUB_REPO         = 'minyubo/ktb-cruming-server'
+        DOCKER_HUB_REPO         = 'minyubo/ktb-cruming-ai'
         IMAGE_TAG               = "${env.BUILD_NUMBER}"
     }
 
