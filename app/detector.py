@@ -6,7 +6,7 @@ import io
 
 class HoldDetector:
     def __init__(self):
-        model_path = Path(__file__).parent.parent / "model" / "weights" / "Ndatayolov11-seg.pt"
+        model_path = Path(__file__).parent.parent / "model" / "weights" / "best.pt"
         self.model = YOLO(str(model_path))
 
     async def detect(self, image_file) -> dict:
