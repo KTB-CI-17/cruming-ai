@@ -14,7 +14,7 @@ app.include_router(health_router)
 # 전역 변수로 detector 초기화
 detector = HoldDetector()
 
-@app.post("/detect", summary="홀드 감지")
+@app.post("/ai/detect", summary="홀드 감지")
 async def detect_holds(file: UploadFile = File(...)):
     """
     이미지에서 홀드를 감지합니다.

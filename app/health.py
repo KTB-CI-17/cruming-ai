@@ -4,7 +4,7 @@ from pathlib import Path
 
 router = APIRouter()
 
-@router.get("/health")
+@router.get("/ai/health")
 async def health_check():
     model_path = Path(__file__).parent.parent / "model" / "weights" / "Ndatayolov5.pt"
     return {
